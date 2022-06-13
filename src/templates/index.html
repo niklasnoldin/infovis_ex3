@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ski touring</title>
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <link rel="stylesheet" href="../static/styles/basic.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
+
+</head>
+
+<body>
+    <h1>InfoVis UE 3 2022</h1>
+    <h3>Niklas Noldin</h3>
+    <h3>Matthias Herret 51831178</h3>
+    <div class="center">
+        <div id="map"></div>
+        <div>
+             <div id="my_dataviz"></div>
+             <div id="elevation"></div>
+             <div id="heartRate"></div>
+        </div>
+    </div>
+
+</body>
+
+</html>
+<script src="../static/js/static_values.js"></script>
+<script src="../static/js/map_chart.js"></script>
+<script src="../static/js/test_plot.js"></script>
+<script src="../static/js/heartrate_plot.js"></script>
+<script type="text/javascript">
+
+    var map = L.map('map', {
+        center: [46.817573, 10.868854],
+        zoom: 13
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // // Load data from jinja2
+    var elevation = {{ elevation | safe }}
+    console.log(elevation)
+
+    // load gpx data
+    var gpx = '../static/data/Venter_Skirunde_.gpx'; // URL to your GPX file or the GPX itself
+    new L.GPX(gpx, {async: true}).on('loaded', function(e) {
+      map.fitBounds(e.target.getBounds());
+    }).addTo(map);
+
+    create_test_plot();
+    // createHeatmap(bli_data);
+
+</script >
