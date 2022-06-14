@@ -35,7 +35,7 @@
 
     var map = L.map('map', {
         center: [46.817573, 10.868854],
-        zoom: 13
+        zoom: 17
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -45,7 +45,11 @@
 
     // // Load data from jinja2
     var elevation = {{ elevation | safe }}
+    var heartRate = {{ heart_rate | safe }}
+    var temperature = {{ temp | safe }}
     console.log(elevation)
+    console.log(heartRate)
+    console.log(temperature)
 
     // load gpx data
     var gpx = '../static/data/Venter_Skirunde_.gpx'; // URL to your GPX file or the GPX itself
