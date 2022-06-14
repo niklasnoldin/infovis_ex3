@@ -14,7 +14,7 @@ data_loader = DataLoader()
 @app.route("/")
 def index():
     """
-    return index.html with transformed and scaled data.
+    return index.html with extracted data
     """
     # with open('venter.geojson', 'w') as file:
     #     file.write(data_loader.get_geo_json())
