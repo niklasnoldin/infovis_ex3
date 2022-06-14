@@ -37,8 +37,8 @@
         center: [46.817573, 10.868854],
         zoom: 12
     });
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    mpBox_url = 'https://api.mapbox.com/styles/v1/mat001/cl4ei2mf5001414po9oxdchts/draft/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibWF0MDAxIiwiYSI6ImNsNGVpMDhpZTAzb3kzcXAxdG85bWdleTYifQ.gqjgm-0RlPBSZ-iOtEjeFg';
+    L.tileLayer(mpBox_url, {
         maxZoom: 19,
         attribution: '© OpenStreetMap'
     }).addTo(map);
