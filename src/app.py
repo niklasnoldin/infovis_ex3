@@ -16,4 +16,11 @@ def index():
     """
     return index.html with transformed and scaled data.
     """
-    return render_template("index.html", elevation=data_loader.get_elevation(), temp=data_loader.get_temperature(), heart_rate= data_loader.get_heart_rate())
+    # with open('venter.geojson', 'w') as file:
+    #     file.write(data_loader.get_geo_json())
+    # print(data_loader.get_geo_json())
+    return render_template("index.html",
+                           geo_json = data_loader.get_geo_json(),
+                           elevation=data_loader.get_elevation(),
+                           temp=data_loader.get_temperature(),
+                           heart_rate= data_loader.get_heart_rate())
