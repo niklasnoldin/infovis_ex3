@@ -3,8 +3,8 @@ import { color } from "/static/js/helpers.js";
 export default function (id, data) {
   const margin = { top: 10, right: 10, bottom: 30, left: 60 },
     width = 400 * 1.618 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
-
+    height = 400 * 1.618 - margin.top - margin.bottom;
+  console.log(data);
   const svg = d3
     .select(id)
     .append("svg")
@@ -23,7 +23,7 @@ export default function (id, data) {
   svg
     .append("defs")
     .append("clipPath")
-    .attr("id", "clipPath-slope")
+    .attr("id", "clipPath-last")
     .append("rect")
     .attr("x", 1)
     .attr("y", 0)
@@ -31,11 +31,11 @@ export default function (id, data) {
     .attr("height", height)
     .attr("fill", "white");
 
-  const padding = 0;
+  const padding = 10;
   // Add X axis
   const x = d3
     .scaleLinear()
-    .domain(d3.extent(data, (d) => d.slope))
+    .domain(d3.extent(data, (d) => d.location[0]))
     .range([padding, width - padding]);
   const bottomAxis = svg
     .append("g")
@@ -48,11 +48,11 @@ export default function (id, data) {
     .attr("x", width / 2)
     .attr("y", margin.bottom)
     .attr("fill", PRIMARY_COLOR)
-    .text("Elevation delta");
+    .text("Longitude");
   // Add Y axis
   const y = d3
     .scaleLinear()
-    .domain(d3.extent(data, (d) => d.heartRate))
+    .domain(d3.extent(data, (d) => d.location[1]))
     .range([height - padding, padding]);
 
   const leftAxis = svg.append("g").call(d3.axisLeft(y));
@@ -64,35 +64,53 @@ export default function (id, data) {
     .attr("y", -margin.left + 24)
     .attr("transform", "rotate(-90)")
     .attr("fill", PRIMARY_COLOR)
-    .text("Heart rate");
+    .text("Latitude");
 
   const scale = d3
     .scaleLinear()
     .domain(d3.extent(data, (d) => d.elevation))
-    .range([1, 3]);
+    .range([1, 10]);
 
-  svg
+  const circles = svg
     .append("g")
-    .style("clip-path", "url(#clipPath-slope)")
+    .style("clip-path", "url(#clipPath-last)")
     .selectAll()
     .data(data)
     .enter()
     .append("circle")
-    .attr("cx", (d) => x(d.slope))
-    .attr("cy", (d) => y(d.heartRate))
+    .attr("cx", (d) => x(d.location[0]))
+    .attr("cy", (d) => y(d.location[1]))
     .attr("r", (d) => scale(d.elevation))
     .style("fill", (d) => color(d.time.getDate()))
     .style("opacity", 0.05);
 
+  const legend = svg
+    .append("g")
+    .selectAll()
+    .data([1, 5, 10])
+    .enter()
+    .append("g")
+    .attr("transform", (d, i) => `translate(25, ${25 + i * 25})`);
+  legend
+    .append("circle")
+    .attr("r", (d) => d)
+    .style("fill", "black");
+  legend
+    .append("text")
+    .attr("text-anchor", "center")
+    .attr("y", 8)
+    .attr("x", 20)
+    .text((d) => `${Math.round(scale.invert(d))}m`);
+
   const brush = d3
-    .brushX() // Add the brush feature using the d3.brush function
+    .brush() // Add the brush feature using the d3.brush function
     .extent([
       [0, 0],
       [width, height],
     ]) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
     .on("end", updateChart);
 
-  svg.append("g").attr("class", "brush").call(brush);
+  svg.append("g").attr("id", "brush-last").call(brush);
 
   let idleTimeout;
   function idled() {
@@ -100,24 +118,29 @@ export default function (id, data) {
   }
 
   function updateChart() {
-    const extent = d3.event.selection;
-
-    // If no selection, back to initial coordinate. Otherwise, update X axis domain
-    if (!extent) {
+    if (!d3.event.selection) {
       if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350)); // This allows to wait a little bit
-      x.domain(d3.extent(data, (d) => d.slope));
+      x.domain(d3.extent(data, (d) => d.location[0]));
+      y.domain(d3.extent(data, (d) => d.location[1]));
     } else {
-      x.domain([x.invert(extent[0]), x.invert(extent[1])]);
-      svg.select(".brush").call(brush.move, null); // This remove the grey brush area as soon as the selection has been done
+      x.domain([
+        x.invert(d3.event.selection[0][0]),
+        x.invert(d3.event.selection[1][0]),
+      ]);
+      y.domain([
+        y.invert(d3.event.selection[1][1]),
+        y.invert(d3.event.selection[0][1]),
+      ]);
+      d3.select("#brush-last").call(brush.move, null);
     }
 
     bottomAxis.transition().duration(1000).call(d3.axisBottom(x));
+    leftAxis.transition().duration(1000).call(d3.axisLeft(y));
 
-    svg
-      .selectAll("circle")
+    circles
       .transition()
       .duration(1000)
-      .attr("cx", (d) => x(d.slope))
-      .attr("cy", (d) => y(d.heartRate));
+      .attr("cx", (d) => x(d.location[0]))
+      .attr("cy", (d) => y(d.location[1]));
   }
 }

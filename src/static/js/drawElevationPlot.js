@@ -1,6 +1,6 @@
 import { PRIMARY_COLOR, SECONDARY_COLOR } from "/static/js/staticValues.js";
 export default function (id, data) {
-  const margin = { top: 10, right: 30, bottom: 30, left: 60 },
+  const margin = { top: 10, right: 10, bottom: 30, left: 60 },
     width = 400 * 1.618 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
