@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Venter Round Tour</title>
-    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <link rel="stylesheet" href="../static/styles/basic.css" />
     <link
       rel="stylesheet"
@@ -31,7 +31,7 @@
         <p>The data was captured by a Garmin fenix 6X Pro sports watch.</p>
       </div>
       <div class="attribution">
-        <p>Niklas Noldin</p>
+        <p>Niklas Noldin 51830380</p>
         <p>Matthias Herret 51831178</p>
       </div>
     </header>
@@ -41,8 +41,8 @@
         <div id="map"></div>
       </div>
       <div class="side-container">
-        <div id="my_dataviz"></div>
         <div id="elevation"></div>
+        <div id="slope"></div>
         <div id="heartRate"></div>
       </div>
     </main>
@@ -51,7 +51,8 @@
 
 <script type="module">
   import {drawMap} from "/static/js/drawMap.js"
-  import {createTestPlot} from "/static/js/testPlot.js"
+  import drawElevationPlot from "/static/js/drawElevationPlot.js";
+  import drawSlopePlot from "/static/js/drawSlopePlot.js";
 
   // Load data from jinja2
   const geoJson = {{ geo_json | safe }}
@@ -60,15 +61,24 @@
   const heartRate = {{ heart_rate | safe }}
   const temperature = {{ temp | safe }}
 
-  const data = location.map((val,idx) => ({
-    time: new Date(Object.keys(val)[0]),
-    location: Object.values(val)[0],
-    elevation: Object.values(elevation[idx])[0],
-    heartRate: Number.parseInt(Object.values(heartRate[idx])[0]),
-    temperature: Number.parseFloat(Object.values(temperature[idx])[0]),
-  }))
+  const data = location.map((val,idx) => {
+    const currentElevation = Object.values(elevation[idx])[0]
+    const previousElevation = Object.values(elevation[idx -1] || elevation[0])[0]
+
+    return {
+      time: new Date(Object.keys(val)[0]),
+      location: Object.values(val)[0],
+      elevation: currentElevation,
+      slope: currentElevation - previousElevation,
+      heartRate: Number.parseInt(Object.values(heartRate[idx])[0]),
+      temperature: Number.parseFloat(Object.values(temperature[idx])[0]),
+    };
+  }).filter(Boolean)
+
+  console.log(data)
+
   drawMap(geoJson);
-  createTestPlot();
-  import drawScatterplot from "/static/js/drawScatterplot.js";
-  // drawScatterplot("#my-dataviz", elevation);
+
+  drawElevationPlot("#elevation", data);
+  drawSlopePlot("#slope", data);
 </script>

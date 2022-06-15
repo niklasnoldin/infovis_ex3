@@ -34,7 +34,7 @@ function createGpxLayer(map, geoJsonData, rect) {
     // console.log(line.getBounds().getCenter());
 
     // Add a red rectange if zoomed out
-    if (map.getZoom() < 15) {
+    if (map.getZoom() < 13) {
       const bounds = line.getBounds().getCenter().toBounds(RADIUS_BOX);
       rect.setBounds(bounds);
       map.addLayer(rect);
