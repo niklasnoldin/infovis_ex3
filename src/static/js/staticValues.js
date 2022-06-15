@@ -13,4 +13,5 @@ export const HIGHLIGHT_STYLE = {
 
 export const RADIUS_BOX = 300;
 export const SECONDARY_COLOR = "#fdf5e6";
+export const SECONDARY_TRANSPARENT = "#fdf5e600";
 export const PRIMARY_COLOR = "#0f0f41";

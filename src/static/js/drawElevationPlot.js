@@ -1,4 +1,9 @@
-import { PRIMARY_COLOR, SECONDARY_COLOR } from "/static/js/staticValues.js";
+import {
+  PRIMARY_COLOR,
+  SECONDARY_TRANSPARENT,
+  SECONDARY_COLOR,
+} from "/static/js/staticValues.js";
+import { color } from "/static/js/helpers.js";
 export default function (id, data) {
   const margin = { top: 10, right: 10, bottom: 30, left: 60 },
     width = 400 * 1.618 - margin.left - margin.right,
@@ -75,8 +80,8 @@ export default function (id, data) {
     .attr("y2", y(d3.max(data, (d) => d.elevation)))
     .selectAll("stop")
     .data([
-      { offset: "50%", color: SECONDARY_COLOR },
-      { offset: "100%", color: "white" },
+      { offset: "10%", color: SECONDARY_TRANSPARENT },
+      { offset: "100%", color: SECONDARY_COLOR },
     ])
     .enter()
     .append("stop")
@@ -87,19 +92,34 @@ export default function (id, data) {
       return d.color;
     });
 
+  const dates = d3
+    .nest()
+    .key((d) => d.time.getDate())
+    .entries(data);
+
   svg
+    .append("g")
+    .selectAll()
+    .data(dates)
+    .enter()
     .append("path")
     .style("clip-path", "url(#clipPath)")
     .attr("id", "line_background")
-    .datum(data)
-    .attr(
-      "d",
+    .attr("d", (d) =>
       d3
         .area()
         .x((d) => x(d.time))
         .y0(y(d3.min(data, (d) => d.elevation)))
-        .y1((d) => y(d.elevation))
+        .y1((d) => y(d.elevation))(d.values)
     )
+    .style("fill", (d) => color(d.values[0].time.getDate()));
+
+  svg
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", width)
+    .attr("height", height)
     .style("fill", "url(#line-gradient)");
 
   svg
