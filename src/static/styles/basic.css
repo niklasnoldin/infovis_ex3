@@ -44,7 +44,6 @@ p {
 
 #heartRate {
   width: 33%;
-  border-right: 4px solid white;
 }
 
 .side-container {
@@ -54,7 +53,9 @@ p {
 #elevation svg,
 #heartRate svg,
 #last svg,
-#slope svg {
+#last,
+#slope svg,
+#slope {
   width: 100%;
   height: auto;
 }

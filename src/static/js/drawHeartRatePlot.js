@@ -2,8 +2,8 @@ import { PRIMARY_COLOR, SECONDARY_COLOR } from "/static/js/staticValues.js";
 import { removeDateFromTime, color } from "/static/js/helpers.js";
 export default function (id, data) {
   const margin = { top: 10, right: 30, bottom: 65, left: 60 },
-    width = 300 - margin.left - margin.right,
-    height = 250 - margin.top - margin.bottom;
+    width = 500 - margin.left - margin.right,
+    height = 180 - margin.top - margin.bottom;
 
   const dates = d3
     .nest()
