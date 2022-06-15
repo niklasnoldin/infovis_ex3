@@ -98,7 +98,7 @@ export default function (id, data) {
   legend
     .append("text")
     .attr("text-anchor", "center")
-    .attr("y", 8)
+    .attr("y", 6)
     .attr("x", 20)
     .text((d) => `${Math.round(scale.invert(d))}m`);
 

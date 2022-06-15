@@ -4,6 +4,7 @@ body {
   min-height: 100vh;
   display: flex;
   margin: 0;
+  padding-bottom: 5rem;
   flex-direction: column;
   font-family: "Source Sans Pro", sans-serif;
   font-weight: 400;
@@ -43,6 +44,7 @@ p {
 
 #heartRate {
   width: 33%;
+  border-right: 4px solid white;
 }
 
 .side-container {

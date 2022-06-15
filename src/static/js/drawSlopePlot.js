@@ -71,28 +71,59 @@ export default function (id, data) {
     .domain(d3.extent(data, (d) => d.elevation))
     .range([1, 3]);
 
-  svg
+  const shape = d3.scaleOrdinal(
+    data.map((d) => d.time.getDate()),
+    d3.symbols.map((s) => d3.symbol().type(s)())
+  );
+
+  const circles = svg
     .append("g")
     .style("clip-path", "url(#clipPath-slope)")
     .selectAll()
-    .data(data)
+    .data(d3.shuffle([...data]))
     .enter()
-    .append("circle")
-    .attr("cx", (d) => x(d.slope))
-    .attr("cy", (d) => y(d.heartRate))
-    .attr("r", (d) => scale(d.elevation))
+    .append("path")
+    .attr("transform", (d) => `translate(${x(d.slope)},${y(d.heartRate)})`)
+    .attr("d", (d) => shape(d.time.getDate()))
     .style("fill", (d) => color(d.time.getDate()))
-    .style("opacity", 0.05);
+    .style("opacity", 0.1);
 
   const brush = d3
-    .brushX() // Add the brush feature using the d3.brush function
+    .brush() // Add the brush feature using the d3.brush function
     .extent([
       [0, 0],
       [width, height],
     ]) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
     .on("end", updateChart);
 
-  svg.append("g").attr("class", "brush").call(brush);
+  svg.append("g").attr("id", "brush-slope").call(brush);
+
+  const legend = svg
+    .append("g")
+    .selectAll()
+    .data([17, 18, 19, 20, 21])
+    .enter()
+    .append("g")
+    .attr("transform", (d, i) => `translate(20, ${10 + i * 15})`);
+  legend
+    .append("path")
+    .attr("d", (d) => shape(d))
+    .attr("transform", "scale(0.75)")
+    .style("fill", "black");
+  legend
+    .append("text")
+    .attr("font-size", "10")
+    .attr("text-anchor", "center")
+    .attr("y", 3.5)
+    .attr("x", 10)
+    .text((d) => d + ". March");
+
+  legend.on("mouseenter", (value) => {
+    circles.filter((d) => d.time.getDate() !== value).style("opacity", 0);
+  });
+  legend.on("mouseleave", (value) => {
+    circles.style("opacity", 0.1);
+  });
 
   let idleTimeout;
   function idled() {
@@ -100,24 +131,28 @@ export default function (id, data) {
   }
 
   function updateChart() {
-    const extent = d3.event.selection;
-
-    // If no selection, back to initial coordinate. Otherwise, update X axis domain
-    if (!extent) {
+    if (!d3.event.selection) {
       if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350)); // This allows to wait a little bit
       x.domain(d3.extent(data, (d) => d.slope));
+      y.domain(d3.extent(data, (d) => d.heartRate));
     } else {
-      x.domain([x.invert(extent[0]), x.invert(extent[1])]);
-      svg.select(".brush").call(brush.move, null); // This remove the grey brush area as soon as the selection has been done
+      x.domain([
+        x.invert(d3.event.selection[0][0]),
+        x.invert(d3.event.selection[1][0]),
+      ]);
+      y.domain([
+        y.invert(d3.event.selection[1][1]),
+        y.invert(d3.event.selection[0][1]),
+      ]);
+      d3.select("#brush-slope").call(brush.move, null);
     }
 
     bottomAxis.transition().duration(1000).call(d3.axisBottom(x));
+    leftAxis.transition().duration(1000).call(d3.axisLeft(y));
 
-    svg
-      .selectAll("circle")
+    circles
       .transition()
       .duration(1000)
-      .attr("cx", (d) => x(d.slope))
-      .attr("cy", (d) => y(d.heartRate));
+      .attr("transform", (d) => `translate(${x(d.slope)},${y(d.heartRate)})`);
   }
 }
