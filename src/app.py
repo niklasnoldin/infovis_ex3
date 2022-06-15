@@ -22,5 +22,6 @@ def index():
     return render_template("index.html",
                            geo_json = data_loader.get_geo_json(),
                            elevation=data_loader.get_elevation(),
+                           location=data_loader.get_location(),
                            temp=data_loader.get_temperature(),
                            heart_rate= data_loader.get_heart_rate())

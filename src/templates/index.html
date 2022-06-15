@@ -1,62 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>ski touring</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Venter Round Tour</title>
     <script src="https://d3js.org/d3.v5.js"></script>
-    <link rel="stylesheet" href="../static/styles/basic.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+    <link rel="stylesheet" href="../static/styles/basic.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+      integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+      integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+      crossorigin=""
+    ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
+  </head>
 
-</head>
+  <body>
+    <header>
+      <div>
+        <h1>Venter Round Tour</h1>
+        <p>
+          With this interactive visualization we accompany Thomas Harasser on
+          his way through the Ötztal. In 5 days, 5 peaks were climbed and 5.515
+          meters of altitude covered.
+        </p>
+        <p>The data was captured by a Garmin fenix 6X Pro sports watch.</p>
+      </div>
+      <div class="attribution">
+        <p>Niklas Noldin</p>
+        <p>Matthias Herret 51831178</p>
+      </div>
+    </header>
 
-<body>
-    <h1>InfoVis UE 3 2022</h1>
-    <h3>Niklas Noldin</h3>
-    <h3>Matthias Herret 51831178</h3>
-    <div class="center">
+    <main>
+      <div class="main-container">
         <div id="map"></div>
-        <div>
-             <div id="my_dataviz"></div>
-             <div id="elevation"></div>
-             <div id="heartRate"></div>
-        </div>
-    </div>
-
-</body>
-
+      </div>
+      <div class="side-container">
+        <div id="my_dataviz"></div>
+        <div id="elevation"></div>
+        <div id="heartRate"></div>
+      </div>
+    </main>
+  </body>
 </html>
-<script src="../static/js/static_values.js"></script>
-<script src="../static/js/map_chart.js"></script>
-<script src="../static/js/test_plot.js"></script>
-<script src="../static/js/heartrate_plot.js"></script>
-<script type="text/javascript">
 
-    var map = L.map('map', {
-        center: [46.817573, 10.868854],
-        zoom: 12
-    });
+<script type="module">
+  import {drawMap} from "/static/js/drawMap.js"
+  import {createTestPlot} from "/static/js/testPlot.js"
 
-    mpBox_url = 'https://api.mapbox.com/styles/v1/mat001/cl4ei2mf5001414po9oxdchts/draft/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibWF0MDAxIiwiYSI6ImNsNGVpMDhpZTAzb3kzcXAxdG85bWdleTYifQ.gqjgm-0RlPBSZ-iOtEjeFg';
-    L.tileLayer(mpBox_url, {
-        maxZoom: 19,
-        attribution: '© MapBoxStudio'
-    }).addTo(map);
+  // Load data from jinja2
+  const geoJson = {{ geo_json | safe }}
+  const location = {{ location | safe }}
+  const elevation = {{ elevation | safe }}
+  const heartRate = {{ heart_rate | safe }}
+  const temperature = {{ temp | safe }}
 
-    // // Load data from jinja2
-    var geoJson = {{ geo_json | safe }}
-    var elevation = {{ elevation | safe }}
-    var heartRate = {{ heart_rate | safe }}
-    var temperature = {{ temp | safe }}
-
-    // console.log(geoJson)
-    // console.log(heartRate)
-    // console.log(temperature)
-
-    // var rectangle = new L.Rectangle(circle.getBounds()).addTo(map);
-    var rect = create_view_rectangle();
-    var gpx = create_gpx_layer(map, geoJson, rect)
-
-    create_test_plot();
-</script >
+  const data = location.map((val,idx) => ({
+    time: new Date(Object.keys(val)[0]),
+    location: Object.values(val)[0],
+    elevation: Object.values(elevation[idx])[0],
+    heartRate: Number.parseInt(Object.values(heartRate[idx])[0]),
+    temperature: Number.parseFloat(Object.values(temperature[idx])[0]),
+  }))
+  drawMap(geoJson);
+  createTestPlot();
+  import drawScatterplot from "/static/js/drawScatterplot.js";
+  // drawScatterplot("#my-dataviz", elevation);
+</script>

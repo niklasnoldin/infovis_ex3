@@ -1,9 +1,6 @@
-import pandas as pd
-from .pca_transformer import PcaPipeline
 import json
 import gpxpy
 from datetime import datetime
-import xml.etree.ElementTree as ET
 
 datetime.strptime('Thu, 16 Dec 2010 12:14:05', '%a, %d %b %Y %H:%M:%S')
 
@@ -68,7 +65,8 @@ class DataLoader:
         Extracting all the data from the gpx file. We aggregate the lists for heart_rate, temperature and elevation as well as the geoJson coordinates.
         The variable AGGREGATE_TO specifiers how many points we should gather in one LineString. More points in one Linestring improves the performance but makes it less exact. (min. is 2)
         """
-        AGGREGATE_TO = 4
+        AGGREGATE_TO = 16
+        self.location_info = []
         self.elevation_info = []
         self.heart_rate_info = []
         self.temp_info = []
@@ -87,6 +85,7 @@ class DataLoader:
                         json_pts.append(self.extract_point_features(temp_pts, temp_dates))
                         temp_dates = [date]
                         temp_pts = [[point.longitude, point.latitude]]
+                    self.location_info.append({date: [point.longitude, point.latitude]})
                     self.elevation_info.append({date: point.elevation})
                     self.heart_rate_info.append({date: self.get_extensions_data_safe(point, 1)})
                     self.temp_info.append({date: self.get_extensions_data_safe(point, 0)})
@@ -96,11 +95,15 @@ class DataLoader:
     def get_elevation(self):
         return json.dumps(self.elevation_info)
 
+    def get_location(self):
+        return json.dumps(self.location_info)
+
     def get_heart_rate(self):
         return json.dumps(self.heart_rate_info)
 
     def get_temperature(self):
         return json.dumps(self.temp_info)
+
 
     def get_geo_json(self):
         # return self.geo_json
