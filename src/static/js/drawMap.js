@@ -29,6 +29,7 @@ function createGpxLayer(map, geoJsonData, rect) {
     .addTo(map);
   rect.bringToFront();
   gpx.setStyle(STANDARD_STYLE);
+  let circles;
   gpx.on("mouseover", function (e) {
     const line = e.sourceTarget;
     // console.log(line.feature.properties.time);
@@ -46,6 +47,16 @@ function createGpxLayer(map, geoJsonData, rect) {
     // UPDATE OTHER CHARTS HERE
 
     // line.feature.properties.time will return a list with all timestamps in this segment
+    const times = line.feature.properties.time.map((val) =>
+      new Date(val).toString()
+    );
+    circles = d3
+      .selectAll("circle")
+      .filter((d) => {
+        return times.includes(d.time?.toString());
+      })
+      .attr("stroke-width", 1)
+      .attr("stroke", "black");
 
     line.setStyle(HIGHLIGHT_STYLE);
   });
@@ -53,6 +64,7 @@ function createGpxLayer(map, geoJsonData, rect) {
     const line = e.sourceTarget;
     line.setStyle(STANDARD_STYLE);
     // map.removeLayer(rect);
+    if (circles) circles.style("stroke", "transparent");
   });
   return gpx;
 }

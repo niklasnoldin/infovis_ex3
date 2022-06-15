@@ -65,7 +65,7 @@ class DataLoader:
         Extracting all the data from the gpx file. We aggregate the lists for heart_rate, temperature and elevation as well as the geoJson coordinates.
         The variable AGGREGATE_TO specifiers how many points we should gather in one LineString. More points in one Linestring improves the performance but makes it less exact. (min. is 2)
         """
-        AGGREGATE_TO = 128
+        AGGREGATE_TO = 128 * 4
         self.location_info = []
         self.elevation_info = []
         self.heart_rate_info = []
