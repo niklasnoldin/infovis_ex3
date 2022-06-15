@@ -97,7 +97,7 @@ export default function (id, data) {
     .key((d) => d.time.getDate())
     .entries(data);
 
-  svg
+  const areas = svg
     .append("g")
     .selectAll()
     .data(dates)
@@ -167,18 +167,17 @@ export default function (id, data) {
 
     bottomAxis.transition().duration(1000).call(d3.axisBottom(x));
 
-    svg
-      .select("#line_background")
+    areas
       .transition()
       .duration(1000)
-      .attr(
-        "d",
+      .attr("d", (d) =>
         d3
           .area()
           .x((d) => x(d.time))
           .y0(y(d3.min(data, (d) => d.elevation)))
-          .y1((d) => y(d.elevation))
+          .y1((d) => y(d.elevation))(d.values)
       );
+
     svg
       .select("#line_path")
       .transition()

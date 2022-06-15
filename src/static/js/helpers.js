@@ -14,4 +14,4 @@ export function removeDateFromTime(date = new Date()) {
 export const color = d3
   .scaleOrdinal()
   .domain([17, 18, 19, 20, 21])
-  .range(["#0f0f41", "#68155a", "#b72558", "#ed5d3e", "#ffa600"]);
+  .range(["#0f0f41", "#825c9a", "#ffb8f9", "#f478ab", "#d43d51"]);
