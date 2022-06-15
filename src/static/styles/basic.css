@@ -32,24 +32,31 @@ p {
   margin: 0;
   max-width: 60ch;
 }
+
 .attribution {
   text-align: right;
 }
-main {
-  flex-grow: 1;
+
+.top-container {
   display: flex;
 }
 
-.main-container,
-.side-container {
-  flex: 1 1 50%;
-}
-.side-container {
+#heartRate {
+  width: 33%;
 }
 
-#map,
+.side-container {
+  width: 66%;
+}
+
 #elevation svg,
+#heartRate svg,
 #slope svg {
   width: 100%;
-  height: 100%;
+  height: auto;
+}
+
+#map {
+  height: 33vh;
+  width: 100%;
 }

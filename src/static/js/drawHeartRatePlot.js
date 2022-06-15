@@ -1,12 +1,25 @@
 import { PRIMARY_COLOR, SECONDARY_COLOR } from "/static/js/staticValues.js";
-import { color } from "/static/js/helpers.js";
+import { removeDateFromTime, color } from "/static/js/helpers.js";
 export default function (id, data) {
-  const margin = { top: 10, right: 30, bottom: 30, left: 60 },
-    width = 400 * 1.618 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+  const margin = { top: 10, right: 30, bottom: 65, left: 60 },
+    width = 300 - margin.left - margin.right,
+    height = 250 - margin.top - margin.bottom;
+
+  const dates = d3
+    .nest()
+    .key((d) => d.time.getDate())
+    .entries(data);
+
+  const timeExtent = [
+    new Date(2022, 1, 1, 7, 30),
+    new Date(2022, 1, 1, 18, 30),
+  ];
 
   const svg = d3
     .select(id)
+    .selectAll("charts")
+    .data(dates)
+    .enter()
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -23,7 +36,7 @@ export default function (id, data) {
   svg
     .append("defs")
     .append("clipPath")
-    .attr("id", "clipPath-slope")
+    .attr("id", "clipPath-heartRate")
     .append("rect")
     .attr("x", 1)
     .attr("y", 0)
@@ -34,21 +47,28 @@ export default function (id, data) {
   const padding = 0;
   // Add X axis
   const x = d3
-    .scaleLinear()
-    .domain(d3.extent(data, (d) => d.slope))
+    .scaleTime()
+    .domain(timeExtent)
     .range([padding, width - padding]);
   const bottomAxis = svg
     .append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x));
+
   bottomAxis
     .append("text")
     .attr("class", "x label")
-    .attr("text-anchor", "center")
-    .attr("x", width / 2)
-    .attr("y", margin.bottom)
     .attr("fill", PRIMARY_COLOR)
-    .text("Elevation delta");
+    .text((d) => d.values[0].time.toLocaleDateString());
+
+  bottomAxis
+    .selectAll("text")
+    .attr("y", 0)
+    .attr("x", -9)
+    .attr("dy", ".35em")
+    .attr("transform", "rotate(-90)")
+    .style("text-anchor", "end");
+
   // Add Y axis
   const y = d3
     .scaleLinear()
@@ -56,6 +76,7 @@ export default function (id, data) {
     .range([height - padding, padding]);
 
   const leftAxis = svg.append("g").call(d3.axisLeft(y));
+
   leftAxis
     .append("text")
     .attr("class", "x label")
@@ -66,23 +87,19 @@ export default function (id, data) {
     .attr("fill", PRIMARY_COLOR)
     .text("Heart rate");
 
-  const scale = d3
-    .scaleLinear()
-    .domain(d3.extent(data, (d) => d.elevation))
-    .range([1, 3]);
-
-  svg
-    .append("g")
-    .style("clip-path", "url(#clipPath-slope)")
-    .selectAll()
-    .data(data)
-    .enter()
-    .append("circle")
-    .attr("cx", (d) => x(d.slope))
-    .attr("cy", (d) => y(d.heartRate))
-    .attr("r", (d) => scale(d.elevation))
-    .style("fill", (d) => color(d.time.getDate()))
-    .style("opacity", 0.05);
+  const lines = svg
+    .append("path")
+    .style("clip-path", "url(#clipPath-heartRate)")
+    .attr("d", (d) =>
+      d3
+        .line()
+        .x((d) => x(removeDateFromTime(d.time)))
+        .y((d) => y(d.heartRate))(d.values)
+    )
+    .style("fill", "none")
+    .style("stroke", (d) => color(d.key))
+    .style("opacity", 0.5)
+    .style("stroke-width", 1);
 
   const brush = d3
     .brushX() // Add the brush feature using the d3.brush function
@@ -105,19 +122,29 @@ export default function (id, data) {
     // If no selection, back to initial coordinate. Otherwise, update X axis domain
     if (!extent) {
       if (!idleTimeout) return (idleTimeout = setTimeout(idled, 350)); // This allows to wait a little bit
-      x.domain(d3.extent(data, (d) => d.slope));
+      x.domain(timeExtent);
     } else {
       x.domain([x.invert(extent[0]), x.invert(extent[1])]);
-      svg.select(".brush").call(brush.move, null); // This remove the grey brush area as soon as the selection has been done
+      d3.select(".brush").call(brush.move, null); // This remove the grey brush area as soon as the selection has been done
     }
 
     bottomAxis.transition().duration(1000).call(d3.axisBottom(x));
+    bottomAxis
+      .selectAll("text")
+      .attr("y", 0)
+      .attr("x", -9)
+      .attr("dy", ".35em")
+      .attr("transform", "rotate(-90)")
+      .style("text-anchor", "end");
 
-    svg
-      .selectAll("circle")
+    lines
       .transition()
       .duration(1000)
-      .attr("cx", (d) => x(d.slope))
-      .attr("cy", (d) => y(d.heartRate));
+      .attr("d", (d) =>
+        d3
+          .line()
+          .x((d) => x(removeDateFromTime(d.time)))
+          .y((d) => y(d.heartRate))(d.values)
+      );
   }
 }

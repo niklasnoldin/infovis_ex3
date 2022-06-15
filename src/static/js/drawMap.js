@@ -6,8 +6,8 @@ import {
 
 export function drawMap(geoJson) {
   const map = L.map("map", {
-    center: [46.8, 10.835],
-    zoom: 12.4,
+    center: [46.825, 10.835],
+    zoom: 11,
   });
   const mpBox_url =
     "https://api.mapbox.com/styles/v1/niklasnoldin/cl4fevjj6001515meu72qb82f/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibmlrbGFzbm9sZGluIiwiYSI6ImNqaGh0NWxzZDF4cGczNnFvbnd0ZHJjbHEifQ.9yoH6H8i310Snle05XVYGA";

@@ -37,13 +37,13 @@
     </header>
 
     <main>
-      <div class="main-container">
-        <div id="map"></div>
-      </div>
-      <div class="side-container">
-        <div id="elevation"></div>
-        <div id="slope"></div>
+      <div id="map"></div>
+      <div class="top-container">
         <div id="heartRate"></div>
+        <div class="side-container">
+          <div id="elevation"></div>
+          <div id="slope"></div>
+        </div>
       </div>
     </main>
   </body>
@@ -53,32 +53,32 @@
   import {drawMap} from "/static/js/drawMap.js"
   import drawElevationPlot from "/static/js/drawElevationPlot.js";
   import drawSlopePlot from "/static/js/drawSlopePlot.js";
+  import drawHeartRatePlot from "/static/js/drawHeartRatePlot.js";
 
   // Load data from jinja2
   const geoJson = {{ geo_json | safe }}
   const location = {{ location | safe }}
   const elevation = {{ elevation | safe }}
-  const heartRate = {{ heart_rate | safe }}
+  const heartRates = {{ heart_rate | safe }}
   const temperature = {{ temp | safe }}
 
   const data = location.map((val,idx) => {
     const currentElevation = Object.values(elevation[idx])[0]
     const previousElevation = Object.values(elevation[idx -1] || elevation[0])[0]
-
+    const slope = currentElevation - previousElevation
+    const heartRate = Number.parseInt(Object.values(heartRates[idx])[0])
     return {
       time: new Date(Object.keys(val)[0]),
       location: Object.values(val)[0],
       elevation: currentElevation,
-      slope: currentElevation - previousElevation,
-      heartRate: Number.parseInt(Object.values(heartRate[idx])[0]),
+      slope: slope < 50 & slope > -15 ? slope : 0, // measuring errors
+      heartRate: heartRate < 150  ? heartRate : null, // measuring errors
       temperature: Number.parseFloat(Object.values(temperature[idx])[0]),
     };
   }).filter(Boolean)
-
-  console.log(data)
-
   drawMap(geoJson);
 
   drawElevationPlot("#elevation", data);
   drawSlopePlot("#slope", data);
+  drawHeartRatePlot("#heartRate", data);
 </script>
